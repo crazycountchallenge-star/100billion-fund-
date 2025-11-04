@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>100 Billion Fund — Demo Portal</title>
+  <meta name="description" content="Demo portal to plan allocation of a fictional $100,000,000,000 fund." />
+  <style>
+    :root{
+      --bg:#f6fbff;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --accent:#0ea5a4;
+      --accent-2:#2563eb;
+      --success:#10b981;
+      --radius:14px;
+      --shadow: 0 8px 24px rgba(15,23,42,0.06);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, var(--bg), #ffffff);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:24px;
+    }
+
+    .container{max-width:1150px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:20px;}
+    header{display:flex;justify-content:space-between;align-items:center;padding:10px 0;}
+    h1{font-size:26px;margin:0;font-weight:700}
+    .sub{font-size:13px;color:var(--muted)}
+
+    .layout{display:grid;grid-template-columns: 1fr 340px;gap:20px}
+    @media (max-width:900px){ .layout{grid-template-columns:1fr} }
+
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow); }
+    .projects .proj{border-radius:10px;border:1px solid #eef2f7;padding:14px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .proj h3{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:13px}
+    .right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+
+    input[type="number"], input[type="text"], textarea, select{
+      padding:10px;border-radius:8px;border:1px solid #e6eef6;font-size:14px;width:100%;
+      outline:none;background:#fff;
+    }
+    input[type="number"]:focus, input[type="text"]:focus, textarea:focus, select:focus{box-shadow:0 0 0 4px rgba(37,99,235,0.06);border-color: #7da7ff}
+
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:0;cursor:pointer;font-weight:600;
+    }
+    .btn-primary{background:var(--accent-2);color:#fff}
+    .btn-green{background:var(--success);color:#fff}
+    .btn-ghost{background:#f3f6fb;border:1px solid #e6eef6;color:#0f172a}
+    .btn-sm{padding:6px 10px;font-size:13px;border-radius:8px}
+
+    .progress{height:10px;background:#eef2f7;border-radius:999px;overflow:hidden}
+    .progress > i{height:100%;display:block;background:linear-gradient(90deg,var(--success),#059669);width:0%}
+
+    form.grid{display:grid;gap:10px}
+
+    .summary-list{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+    .summary-list li{font-size:14px}
+
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+    footer{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
+
+    .message{padding:10px;border-radius:10px;background:#f8fafc;border:1px solid #eef2f7;color:#0f172a;font-size:14px}
+
+    /* small utilities */
+    .flex{display:flex;align-items:center;gap:8px}
+    .stack{display:flex;flex-direction:column;gap:8px}
+    .right-align{text-align:right}
+    .note{font-size:12px;color:var(--muted)}
+    .copy{cursor:pointer;text-decoration:underline}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>100 Billion Fund — Demo Portal</h1>
+        <div class="sub">Fictional fund for planning &amp; demo only</div>
+      </div>
+      <div class="right-align">
+        <div class="sub">Remaining</div>
+        <div style="font-size:22px;font-weight:700;color:#047857" id="remainingDisplay">$100,000,000,000</div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <main>
+        <section class="card projects" id="projectsCard">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div>
+              <h2 style="margin:0;font-size:18px">Top Project Ideas</h2>
+              <div class="note">Allocate funds directly or submit your own project.</div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-ghost btn-sm" id="resetBtn">Reset Demo</button>
+              <button class="btn btn-primary btn-sm" id="exportBtn">Export Plan</button>
+            </div>
+          </div>
+
+          <div id="projectsList" style="display:grid;gap:12px">
+            </div>
+        </section>
+
+        <section style="margin-top:18px" class="card">
+          <h3 style="margin:0 0 8px 0">Submit a Project</h3>
+          <form id="projectForm" class="grid">
+            <input id="projTitle" type="text" placeholder="Project title (e.g. Global Clean Water Initiative)" required />
+            <input id="projRequest" type="number" placeholder="Requested amount (USD — number only)" min="1" required />
+            <div style="display:flex;gap:8px">
+              <button type="submit" class="btn btn-green">Submit</button>
+              <button type="button" class="btn btn-ghost" id="clearForm">Clear</button>
+            </div>
+            <div class="note">Submitted projects are added to the top of the list (demo only, no external submission).</div>
+          </form>
+        </section>
+
+        <section style="margin-top:18px" class="card" id="purchaseCard">
+          <h3 style="margin:0 0 8px 0">Purchase Requests (Simulation)</h3>
+          <form id="purchaseForm" class="grid">
+            <input id="itemName" type="text" placeholder="Item name (e.g. Rolls-Royce Phantom)" required />
+            <select id="itemCategory" required>
+              <option value="">Select category</option>
+              <option value="Luxury Car">Luxury Car</option>
+              <option value="Ship">Ship / Yacht</option>
+              <option value="Airplane">Airplane / Jet</option>
+              <option value="Firearm">Firearm / Weapon</option>
+              <option value="Other">Other</option>
+            </select>
+            <input id="itemPrice" type="number" placeholder="Price (USD)" min="1" required />
+            <input id="itemQty" type="number" placeholder="Quantity" min="1" value="1" required />
+            <div style="display:flex;gap:8px">
+              <button type="submit" class="btn btn-primary">Request Purchase</button>
+              <button type="button" class="btn btn-ghost" id="clearPurchase">Clear</button>
+            </div>
+            <div class="note">Note: Firearm / Weapon requests are blocked in this demo for safety and legal reasons.</div>
+          </form>
+
+          <div style="margin-top:12px">
+            <h4 style="margin:0 0 8px 0">Purchase Log (simulation)</h4>
+            <div id="purchaseLog" style="display:grid;gap:8px"></div>
+          </div>
+        </section>
+
+      </main>
+
+      <aside>
+        <div class="card">
+          <h4 style="margin:0 0 8px 0">Fund Summary</h4>
+          <ul class="summary-list">
+            <li>Total fund: <strong id="totalDisplay">$100,000,000,000</strong></li>
+            <li>Remaining: <strong id="remainingSmall">$100,000,000,000</strong></li>
+            <li>Allocated: <strong id="allocatedSmall">$0</strong></li>
+          </ul>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" id="copyRemaining">Copy Remaining</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin:0 0 8px 0">Quick Actions</h4>
+          <div style="display:grid;gap:8px">
+            <button class="btn btn-ghost" id="startVote">Start Public Vote</button>
+            <button class="btn btn-ghost" id="editRules">Edit Governance Rules</button>
+            <button class="btn btn-ghost" id="reviewApps">Review Applications</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin:0 0 8px 0">Message</h4>
+          <div class="message" id="messageBox">No messages yet.</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      This is a demo/prototype UI for planning how to spend a fictional $100 billion fund. Use it to brainstorm allocations, collect project ideas, and run simulated governance.
+    </footer>
+  </div>
+
+  <script>
+    /* ---------- Demo data and state ---------- */
+    const TOTAL_FUND = 100_000_000_000; // 100 billion
+    let remaining = TOTAL_FUND;
+    let projects = [
+      { id: 1, title: "Global Clean Water Initiative", requested: 5_000_000_000, allocated: 0 },
+      { id: 2, title: "Universal Education Fund", requested: 10_000_000_000, allocated: 0 },
+      { id: 3, title: "Green Cities Reforestation", requested: 2_500_000_000, allocated: 0 }
+    ];
+
+    /* Utility: format number as USD with commas */
+    function fmt(n){ return '$' + Number(n).toLocaleString('en-US'); }
+
+    /* ---------- DOM elements ---------- */
+    const remainingDisplay = document.getElementById('remainingDisplay');
+    const remainingSmall = document.getElementById('remainingSmall');
+    const totalDisplay = document.getElementById('totalDisplay');
+    const allocatedSmall = document.getElementById('allocatedSmall');
+    const projectsList = document.getElementById('projectsList');
+    const messageBox = document.getElementById('messageBox');
+
+    /* ---------- Render functions ---------- */
+    function renderSummary(){
+      remainingDisplay.textContent = fmt(remaining);
+      remainingSmall.textContent = fmt(remaining);
+      totalDisplay.textContent = fmt(TOTAL_FUND);
+      const allocated = TOTAL_FUND - remaining;
+      allocatedSmall.textContent = fmt(allocated);
+    }
+
+    function makeProjectElement(p){
+      const wrapper = document.createElement('div');
+      wrapper.className = 'proj';
+
+      const left = document.createElement('div');
+      left.style.flex = '1';
+      const title = document.createElement('h3');
+      title.textContent = p.title;
+      const req = document.createElement('div');
+      req.className = 'muted';
+      req.textContent = 'Requested: ' + fmt(p.requested);
+      const alloc = document.createElement('div');
+      alloc.className = 'muted';
+      alloc.textContent = 'Allocated: ' + fmt(p.allocated);
+
+      left.appendChild(title);
+      left.appendChild(req);
+      left.appendChild(alloc);
+
+      const right = document.createElement('div');
+      right.style.width = '260px';
+      right.className = 'right';
+
+      // input row
+      const inputRow = document.createElement('div');
+      inputRow.style.display = 'flex';
+      inputRow.style.gap = '8px';
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.placeholder = 'Amount';
+      input.min = '1';
+      input.style.flex = '1';
+      input.id = 'amt-' + p.id;
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-primary btn-sm';
+      btn.textContent = 'Allocate';
+
+      btn.addEventListener('click', () => {
+        allocateToProject(p.id, input.value);
+      });
+
+      inputRow.appendChild(input);
+      inputRow.appendChild(btn);
+
+      // progress bar
+      const progWrap = document.createElement('div');
+      progWrap.style.marginTop = '10px';
+      progWrap.innerHTML = '<div class="progress"><i></i></div>';
+      const pct = Math.min(100, Math.round((p.allocated / Math.max(1,p.requested)) * 100));
+      progWrap.querySelector('i').style.width = pct + '%';
+
+      right.appendChild(inputRow);
+      right.appendChild(progWrap);
+
+      wrapper.appendChild(left);
+      wrapper.appendChild(right);
+
+      return wrapper;
+    }
+
+    function renderProjects(){
+      projectsList.innerHTML = '';
+      projects.forEach(p => {
+        projectsList.appendChild(makeProjectElement(p));
+      });
+    }
+
+    /* ---------- Actions ---------- */
+    function setMessage(text, persist=false){
+      messageBox.textContent = text;
+      if(!persist){
+        clearTimeout(setMessage._t);
+        setMessage._t = setTimeout(()=> {
+          if(messageBox.textContent === text) messageBox.textContent = 'No messages yet.';
+        }, 6000);
+      }
+    }
+
+    function allocateToProject(id, amountStr){
+      const amount = Number(amountStr);
+      if(!amount || isNaN(amount) || amount <= 0){
+        setMessage('Please enter a positive number.');
+        return;
+      }
+      if(amount > remaining){
+        setMessage('Not enough funds remaining.');
+        return;
+      }
+      const p = projects.find(x => x.id === id);
+      if(!p){ setMessage('Project not found.'); return; }
+      p.allocated += amount;
+      remaining -= amount;
+      renderProjects();
+      renderSummary();
+      setMessage('Allocated ' + fmt(amount) + ' to "' + p.title + '".');
+      saveState();
+    }
+
+    /* Submit new project */
+    const projectForm = document.getElementById('projectForm');
+    projectForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = document.getElementById('projTitle').value.trim();
+      const requested = Number(document.getElementById('projRequest').value);
+      if(!title || !requested || requested <= 0){
+        setMessage('Please provide a valid title and requested amount.');
+        return;
+      }
+      const newProj = { id: Date.now(), title, requested, allocated: 0 };
+      projects.unshift(newProj);
+      document.getElementById('projTitle').value = '';
+      document.getElementById('projRequest').value = '';
+      renderProjects();
+      setMessage('Project submitted for review (demo).');
+      saveState();
+    });
+
+    document.getElementById('clearForm').addEventListener('click', () => {
+      document.getElementById('projTitle').value = '';
+      document.getElementById('projRequest').value = '';
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if(!confirm('Reset demo to original example data?')) return;
+      projects = [
+        { id: 1, title: "Global Clean Water Initiative", requested: 5_000_000_000, allocated: 0 },
+        { id: 2, title: "Universal Education Fund", requested: 10_000_000_000, allocated: 0 },
+        { id: 3, title: "Green Cities Reforestation", requested: 2_500_000_000, allocated: 0 }
+      ];
+      remaining = TOTAL_FUND;
+      renderProjects();
+      renderSummary();
+      setMessage('Demo reset.');
+      clearState();
+      // Clear purchase history too
+      try{ localStorage.removeItem('demo_purchase_history_v1'); }catch(e){}
+      renderPurchaseLog();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      // placeholder: create JSON export of current plan
+      const exportObj = { total: TOTAL_FUND, remaining, projects, purchases: JSON.parse(localStorage.getItem('demo_purchase_history_v1')||'[]') };
+      const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '100b-fund-plan.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      setMessage('Exported plan as JSON (demo).');
+    });
+
+    document.getElementById('copyRemaining').addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(remaining.toString());
+        setMessage('Copied remaining amount to clipboard.');
+      }catch(e){
+        setMessage('Copy failed — your browser may block clipboard access.');
+      }
+    });
+
+    document.getElementById('startVote').addEventListener('click', ()=> setMessage('Voting started (demo).'));
+    document.getElementById('editRules').addEventListener('click', ()=> setMessage('Governance rules opened (demo).'));
+    document.getElementById('reviewApps').addEventListener('click', ()=> setMessage('Applications reviewed (demo).'));
+
+    /* ---------- Persistence (simple) ---------- */
+    const LS_KEY = 'demo_100b_state_v1';
+    function saveState(){
+      const s = { remaining, projects };
+      try{ localStorage.setItem(LS_KEY, JSON.stringify(s)); }catch(e){}
+    }
+    function loadState(){
+      try{
+        const txt = localStorage.getItem(LS_KEY);
+        if(!txt) return false;
+        const s = JSON.parse(txt);
+        if(typeof s.remaining === 'number' && Array.isArray(s.projects)){
+          remaining = s.remaining;
+          projects = s.projects;
+          return true;
+        }
+      }catch(e){}
+      return false;
+    }
+    function clearState(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} }
+
+    /* ---------- Purchase simulation (safe) ---------- */
+    const purchaseForm = document.getElementById('purchaseForm');
+    const purchaseLog = document.getElementById('purchaseLog');
+    const itemNameEl = document.getElementById('itemName');
+    const itemCatEl = document.getElementById('itemCategory');
+    const itemPriceEl = document.getElementById('itemPrice');
+    const itemQtyEl = document.getElementById('itemQty');
+    const clearPurchaseBtn = document.getElementById('clearPurchase');
+
+    function renderPurchaseLog(){
+      purchaseLog.innerHTML = '';
+      const history = JSON.parse(localStorage.getItem('demo_purchase_history_v1') || '[]');
+      if(history.length === 0){
+        purchaseLog.innerHTML = '<div class="muted small">No purchases yet (simulation).</div>';
+        return;
+      }
+      history.forEach((rec) => {
+        const d = document.createElement('div');
+        d.className = 'proj';
+        d.style.alignItems = 'center';
+        d.innerHTML = `<div style="flex:1">
+                        <strong>${rec.name}</strong> <div class="muted">${rec.category} — ${rec.qty} × ${fmt(rec.price)}</div>
+                       </div>
+                       <div style="text-align:right">${fmt(rec.total)}</div>`;
+        purchaseLog.appendChild(d);
+      });
+    }
+
+    purchaseForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      const name = itemNameEl.value.trim();
+      const category = itemCatEl.value;
+      const price = Number(itemPriceEl.value);
+      const qty = Number(itemQtyEl.value) || 1;
+      if(!name || !category || !price || price <= 0 || qty <= 0){
+        setMessage('कृपया वैध जानकारी दें।');
+        return;
+      }
+
+      // SAFETY: block weapons/firearms
+      if(category === 'Firearm'){
+        setMessage('Firearm/Weapon purchases are blocked in this demo for legal and safety reasons. If you need to model security procurement, choose "Other" and add a compliance workflow.');
+        return;
+      }
+
+      const totalCost = price * qty;
+      if(totalCost > remaining){
+        setMessage('Not enough funds remaining for this purchase (simulation).');
+        return;
+      }
+
+      // Deduct (simulate)
+      remaining -= totalCost;
+      const purchaseRecord = { id: Date.now(), name, category, price, qty, total: totalCost, date: new Date().toISOString() };
+
+      // Save to localStorage history
+      const histKey = 'demo_purchase_history_v1';
+      const history = JSON.parse(localStorage.getItem(histKey) || '[]');
+      history.unshift(purchaseRecord);
+      localStorage.setItem(histKey, JSON.stringify(history));
+
+      renderPurchaseLog();
+      renderSummary(); // update remaining/allocated display
+      setMessage(`Simulated purchase: ${qty} × ${name} for ${fmt(totalCost)} (deducted).`);
+      saveState(); // keep funds state consistent with projects storage
+
+      // clear form fields
+      itemNameEl.value = '';
+      itemCatEl.value = '';
+      itemPriceEl.value = '';
+      itemQtyEl.value = '1';
+    });
+
+    clearPurchaseBtn.addEventListener('click', () => {
+      itemNameEl.value = '';
+      itemCatEl.value = '';
+      itemPriceEl.value = '';
+      itemQtyEl.value = '1';
+    });
+
+    (function init(){
+      const had = loadState();
+      if(!had){
+        remaining = TOTAL_FUND;
+      }
+      renderProjects();
+      renderSummary();
+      renderPurchaseLog();
+      setMessage('Welcome — this is a demo. Changes are stored locally in your browser.');
+    })();
+
+    /* Make debug helpers available */
+    window._demo = { projects, allocateToProject };
+  </script>
+</body>
+</html>
